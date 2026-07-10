@@ -1,28 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    
-    <!-- Tambahkan baris ini agar video login pas di HP dan tidak kepotong -->
-    <style>
-        video, .video-background, #bg-video {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            z-index: -100;
-            transform: translateX(-50%) translateY(-50%);
-            background-size: cover;
-            object-fit: cover; /* Sifat sakti agar video otomatis nge-fit di HP */
-        }
-    </style>
     <meta charset="UTF-8">
-    <head>
-    <!-- Tambahkan baris ini di dalam tag head agar web responsive di HP -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nita Birthday</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,157 +16,13 @@
 <body>
     <body>
     <!-- Canvas untuk Efek Matrix Rain -->
-    <!-- =================================================================== -->
-    <!-- INTRO MATRIX PARTICLE MORPHING (VERSI SUPER RINGAN & RESPONSIF HP) -->
-    <!-- =================================================================== -->
-    <canvas id="matrixCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; background: #000; transition: opacity 1.2s ease, visibility 1.2s ease;"></canvas>
+    <canvas id="matrixCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; transition: opacity 1s ease, visibility 1s ease;"></canvas>
 
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const canvas = document.getElementById('matrixCanvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+    <canvas id="particleCanvas"></canvas>
+    ...
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 2); 
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.scale(dpr, dpr);
+    <canvas id="particleCanvas"></canvas>
 
-        const matrixChars = "HAPPYBIRTHDAYNITA123".split("");
-        const particles = [];
-        const isMobile = width < 768;
-        
-        // Jumlah partikel dipangkas biar HP ga lag
-        const maxParticles = isMobile ? 220 : 900; 
-
-        const stages = ["3", "2", "1", "HAPPY", "BIRTHDAY", "TO", "NITA ❤️"];
-        let stageIndex = 0;
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.speed = Math.random() * 2 + 1.5;
-                this.char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                this.size = isMobile ? (Math.random() * 2 + 12) : (Math.random() * 4 + 15); 
-                
-                this.targetX = null;
-                this.targetY = null;
-                this.isFormingText = false;
-                this.ease = isMobile ? 0.09 : 0.07; 
-            }
-
-            update() {
-                if (this.isFormingText && this.targetX !== null && this.targetY !== null) {
-                    this.x += (this.targetX - this.x) * this.ease;
-                    this.y += (this.targetY - this.y) * this.ease;
-                } else {
-                    this.y += this.speed;
-                    if (this.y > height) {
-                        this.y = -20;
-                        this.x = Math.random() * width;
-                    }
-                    if (Math.random() > 0.95) this.char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                }
-            }
-
-            draw() {
-                ctx.fillStyle = this.isFormingText ? '#ff3385' : 'rgba(255, 51, 133, 0.12)';
-                if (this.isFormingText && Math.random() > 0.85) ctx.fillStyle = '#ffffff';
-                ctx.font = `bold ${this.size}px monospace`;
-                ctx.fillText(this.char, this.x, this.y);
-            }
-        }
-
-        for (let i = 0; i < maxParticles; i++) {
-            particles.push(new Particle());
-        }
-
-        function getFormedPoints(text) {
-            const memCanvas = document.createElement('canvas');
-            const memCtx = memCanvas.getContext('2d');
-            memCanvas.width = width;
-            memCanvas.height = height;
-
-            memCtx.fillStyle = '#000';
-            memCtx.fillRect(0, 0, memCanvas.width, memCanvas.height);
-
-            let fontScale = isMobile ? 0.16 : 0.22;
-            if (text.length > 5) fontScale = isMobile ? 0.08 : 0.12; 
-
-            memCtx.fillStyle = '#fff';
-            memCtx.font = `bold ${width * fontScale}px Arial, sans-serif`;
-            memCtx.textAlign = 'center';
-            memCtx.textBaseline = 'middle';
-            memCtx.fillText(text, width / 2, height / 2);
-
-            const imgData = memCtx.getImageData(0, 0, width, height).data;
-            const points = [];
-            const gap = isMobile ? 7 : 8; 
-
-            for (let y = 0; y < height; y += gap) {
-                for (let x = 0; x < width; x += gap) {
-                    const index = (y * width + x) * 4;
-                    if (imgData[index] > 120) {
-                        points.push({ x: x, y: y });
-                    }
-                }
-            }
-            return points;
-        }
-
-        function nextStage() {
-            if (stageIndex >= stages.length) {
-                canvas.style.opacity = '0';
-                canvas.style.visibility = 'hidden';
-                setTimeout(() => canvas.remove(), 1200);
-                return;
-            }
-
-            const currentStageText = stages[stageIndex];
-            const targets = getFormedPoints(currentStageText);
-            targets.sort(() => Math.random() - 0.5);
-
-            particles.forEach(p => {
-                p.isFormingText = false;
-                p.targetX = null;
-                p.targetY = null;
-            });
-
-            setTimeout(() => {
-                for (let i = 0; i < particles.length; i++) {
-                    if (i < targets.length) {
-                        particles[i].isFormingText = true;
-                        particles[i].targetX = targets[i].x;
-                        particles[i].targetY = targets[i].y;
-                    }
-                }
-                stageIndex++;
-                setTimeout(nextStage, 1400);
-            }, 80); 
-        }
-
-        function playAnim() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-            ctx.fillRect(0, 0, width, height);
-
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-
-            if (stageIndex <= stages.length) {
-                requestAnimationFrame(playAnim);
-            }
-        }
-
-        playAnim();
-        setTimeout(nextStage, 400);
-    });
-    </script>
     <audio id="bgMusic" loop>
         <source src="assets/music/Tulus - Monokrom - [musicmu1.blogspot.co.id].mp3" type="audio/mpeg">
     </audio>
@@ -267,7 +103,7 @@
 
             <div class="carousel-caption-zone">
                 <h3 id="captionTitle">Our Journey</h3>
-                <p id="captionDesc">Setiap foto di album ini menjadi pengingat bahwa kita telah melewati banyak momen, dan semoga masih ada ribuan momen lagi yang akan dilewati bersama 🤍</p>
+                <p id="captionDesc">Album ini menjadi pengingat bahwa kita telah melewati banyak momen, dan semoga masih ada ribuan momen lagi yang akan dilewati bersama 🤍</p>
             </div>
                 
             <div style="text-align: center; margin-top: 60px;">
@@ -389,8 +225,8 @@
                 <!-- Area Voucher Gosok -->
                 <div class="scratch-container" style="position: relative; width: 300px; height: 150px; margin: 0 auto; box-shadow: 0 12px 28px rgba(0,0,0,0.45); border-radius: 15px; overflow: hidden;">
                     <div class="scratch-reward" style="position: absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#18111a; border-radius:15px; text-align:center; padding: 15px; border: 2px dashed rgba(255,215,0,0.35); box-sizing: border-box;">
-                        <h3 style="color:#ff7597; font-size:0.95rem; margin: 0 0 8px 0; font-weight: 600; letter-spacing: 1px;">🎁 VOUCHER EKSKLUSIF:</h3>
-                        <p style="font-size:1.1rem; font-weight:700; color:gold; line-height: 1.4; font-family: 'Montserrat', sans-serif; margin: 0;">kamu boleh ajak aku kemanapun tanpa penolakan 🎫</p>
+                        <h3 style="color:#ff7597; font-size:0.95rem; margin: 0 0 8px 0; font-weight: 600; letter-spacing: 1px;"> VOUCHER EKSKLUSIF</h3>
+                        <p style="font-size:1.1rem; font-weight:700; color:gold; line-height: 1.4; font-family: 'Montserrat', sans-serif; margin: 0;">kamu boleh ajak aku kemanapun (voucher ini bisa dipakai kapan saja) 🎫</p>
                     </div>
                     <canvas id="scratchCanvas" width="300" height="150" style="position:absolute; top:0; left:0; border-radius:15px; cursor: pointer;"></canvas>
                 </div>
@@ -406,7 +242,6 @@
 
     </div>
 
-        <script src="js/main.js"></script>
-    
+    <script src="js/main.js"></script>
 </body>
 </html>
