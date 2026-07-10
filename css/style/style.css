@@ -1,0 +1,391 @@
+/* ===================================================================
+   GLOBAL STRUCTURE & BACKGROUND
+   =================================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #0a0a0c;
+    color: #ffffff;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+}
+#particleCanvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+/* ===================================================================
+   STAGE 1: LOCK SCREEN (GLASSMORPHISM BOX DESIGN)
+   =================================================================== */
+.intro-layer { 
+    position: fixed; 
+    inset: 0; 
+    background: #0a0a0c; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 999; 
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.glass-box { 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%); 
+    backdrop-filter: blur(25px); 
+    -webkit-backdrop-filter: blur(25px); 
+    padding: 3rem 2rem; 
+    border-radius: 24px; 
+    text-align: center; 
+    max-width: 400px; 
+    width: 90%; 
+    position: relative;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.6), 
+        0 0 40px rgba(255, 117, 151, 0.15), 
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 24px;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255, 117, 151, 0.4) 0%, rgba(229, 193, 88, 0.2) 50%, rgba(255, 255, 255, 0.05) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.glass-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.7), 
+        0 0 50px rgba(255, 117, 151, 0.25), 
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.title-love {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 2.6rem;
+    color: #ffffff; 
+    margin: 15px 0;
+    text-shadow: 0 0 15px rgba(255, 117, 151, 0.4);
+}
+
+.heart-icon-premium {
+    width: 45px;
+    height: 45px;
+    margin: 0 auto 15px auto;
+    color: #ff7597;
+    filter: drop-shadow(0 0 8px rgba(255, 117, 151, 0.6));
+    animation: heartbeatGlow 2s infinite ease-in-out;
+}
+
+.heart-icon-premium svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+}
+
+@keyframes heartbeatGlow {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(255, 117, 151, 0.5)); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 0 15px rgba(255, 117, 151, 0.9)); }
+}
+
+.sub-intro { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 25px; line-height: 1.5; }
+
+#dateInput { 
+    width: 100%; 
+    max-width: 220px; 
+    background: rgba(255,255,255,0.05); 
+    border: 1px solid rgba(255,255,255,0.2); 
+    padding: 12px; 
+    border-radius: 10px; 
+    color: white; 
+    outline: none; 
+}
+
+#dateInput[type="password"] {
+    font-family: monospace, sans-serif;
+    font-size: 2rem;
+    letter-spacing: 8px;
+    padding-left: 14px;
+}
+
+.error-text { color: #ff4a4a; font-size: 0.8rem; margin-top: 10px; min-height: 18px; }
+
+.btn-elegant {
+    width: 100%; 
+    padding: 14px; 
+    background: linear-gradient(135deg, #ff7597, #c15470); 
+    border: none; 
+    border-radius: 10px; 
+    color: white; 
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem; 
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer; 
+    transition: 0.3s; 
+    box-shadow: 0 5px 15px rgba(255, 117, 151, 0.2); 
+}
+.btn-elegant:hover {
+    box-shadow: 0 5px 25px rgba(255, 117, 151, 0.6);
+    transform: scale(1.02);
+}
+
+/* ===================================================================
+   MAIN LAYOUT & STAGE 2: HERO BANNER
+   =================================================================== */
+.web-hidden { display: none !important; opacity: 0; }
+.fullscreen-sec { position: relative; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.bg-video-full { position: absolute; top:50%; left:50%; width:100%; height:100%; object-fit:cover; transform:translate(-50%,-50%); z-index:-2; }
+.bg-video-contain { position: absolute; top:50%; left:50%; width:100%; height:100%; object-fit:contain; transform:translate(-50%,-50%); z-index:-2; }
+.video-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(10,10,12,0.4), #0a0a0c); z-index: -1; }
+.hero-center { text-align: center; z-index: 5; }
+.glow-text { font-size: 1.2rem; letter-spacing: 8px; color: #e5c158; margin-bottom: 10px; }
+
+.typing-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 600;
+    font-style: italic;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(255, 117, 151, 0.6);
+    border-right: 3px solid #ff7597;
+    white-space: nowrap;
+    margin: 0 auto;
+    display: inline-block;
+    animation: blinkCursor 0.75s step-end infinite;
+}
+
+#lyricsContainer { margin-top: 20px; font-style: italic; color: #ff7597; }
+#lyricText {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+}
+
+@keyframes blinkCursor {
+    from, to { border-color: transparent }
+    50% { border-color: #ff7597; }
+}
+
+.scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+.scroll-indicator p {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-family: 'Montserrat', sans-serif;
+}
+.arrow-down {
+    width: 12px;
+    height: 12px;
+    border-right: 2px solid #ff7597;
+    border-bottom: 2px solid #ff7597;
+    transform: rotate(45deg);
+    margin: 0 auto;
+    animation: bounceArrow 1.5s infinite;
+}
+
+@keyframes bounceArrow {
+    0%, 100% { transform: translateY(0) rotate(45deg); opacity: 0.5; }
+    50% { transform: translateY(10px) rotate(45deg); opacity: 1; }
+}
+
+/* ===================================================================
+   MUSIC EQUALIZER ANIMATION
+   =================================================================== */
+.music-controller { position: fixed; top: 25px; right: 25px; z-index: 100; display: flex; gap: 3px; align-items: flex-end; height: 25px; cursor: pointer; }
+.eq-bar { width: 3px; background: #ff2a5f; height: 5px; }
+.music-controller.playing .bar1 { animation: eqAnim 0.6s infinite alternate; }
+.music-controller.playing .bar2 { animation: eqAnim 0.8s infinite alternate 0.2s; }
+.music-controller.playing .bar3 { animation: eqAnim 0.5s infinite alternate 0.4s; }
+@keyframes eqAnim { 0% { height: 5px; } 100% { height: 20px; } }
+
+/* ===================================================================
+   STAGE 3: 3D INFINITE CAROUSEL
+   =================================================================== */
+.gallery-sec-3d {
+    padding: 80px 0;
+    position: relative;
+    z-index: 5;
+    background: #0a0a0c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+.carousel-3d-stage {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 420px;
+    margin: 40px auto 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1200px;
+}
+
+.carousel-3d-container {
+    position: relative;
+    width: 280px;
+    height: 380px;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+}
+
+.card-3d-item {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 117, 151, 0.15);
+    background: #141416;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease, visibility 0.6s;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.card-3d-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.card-3d-item::after { content: ''; position: absolute; inset: 0; background: rgba(10, 10, 12, 0.4); transition: opacity 0.6s ease; }
+.card-3d-item.active::after { opacity: 0; }
+
+.nav-btn-3d {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 117, 151, 0.25);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.3s ease;
+}
+.nav-btn-3d svg { width: 22px; height: 22px; }
+.nav-btn-3d:hover { background: #ff7597; border-color: #ff7597; box-shadow: 0 0 20px rgba(255, 117, 151, 0.5); }
+.prev-3d { left: 40px; }
+.next-3d { right: 40px; }
+
+.carousel-caption-zone { text-align: center; max-width: 500px; width: 90%; min-height: 80px; margin: 10px auto 30px auto; }
+#captionTitle { font-family: 'Playfair Display', serif; color: #ff7597; font-size: 1.35rem; font-style: italic; margin-bottom: 6px; }
+#captionDesc { font-family: 'Poppins', sans-serif; color: rgba(255, 255, 255, 0.75); font-size: 0.85rem; line-height: 1.5; font-weight: 300; }
+
+@media (max-width: 768px) {
+    .carousel-3d-stage { height: 350px; max-width: 100%; }
+    .carousel-3d-container { width: 200px; height: 290px; }
+    .prev-3d { left: 15px; }
+    .next-3d { right: 15px; }
+}
+
+/* ===================================================================
+   STAGE 4: FOGGY SCREEN OVERLAY
+   =================================================================== */
+#foggyOverlay { position: fixed; inset: 0; z-index: 9999; background: #000; overflow: hidden; }
+.fog-background-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+#fogCanvas { position: absolute; inset: 0; z-index: 2; cursor: pointer; }
+.instruction-text { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); z-index: 3; color: white; text-align: center; pointer-events: none; text-shadow: 0 2px 10px rgba(0,0,0,0.9); font-size: 1.1rem; width: 80%; animation: pulseGlow 2s infinite; }
+@keyframes pulseGlow { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* ===================================================================
+   STAGE 5: CAKE DESIGN & FLAME TRANSITION
+   =================================================================== */
+.cake-container { position: relative; width: 250px; height: 250px; display: flex; justify-content: center; align-items: flex-end; margin: 20px auto; }
+.plate { position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 260px; height: 12px; background: #e0e0e0; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 1; }
+.new-cake { position: relative; width: 180px; height: 140px; background: #6f4e37; border-radius: 12px 12px 4px 4px; z-index: 2; overflow: hidden; box-shadow: inset 0 -15px 30px rgba(0,0,0,0.3); }
+.layer { position: absolute; width: 100%; height: 12px; background: #ffb7c5; }
+.layer-bottom { bottom: 30px; }
+.layer-middle { bottom: 70px; }
+.layer-top    { bottom: 110px; }
+.icing { position: absolute; top: 0; left: 0; width: 100%; height: 25px; background: #ff4081; border-radius: 12px 12px 0 0; }
+.drips { position: absolute; top: 20px; width: 100%; height: 20px; }
+.drip { position: absolute; background: #ff4081; border-radius: 0 0 20px 20px; }
+.drip1 { left: 20px; width: 12px; height: 18px; }
+.drip2 { left: 80px; width: 15px; height: 25px; }
+.drip3 { right: 30px; width: 10px; height: 15px; }
+
+.candle-wrapper { position: absolute; bottom: 135px; left: 50%; transform: translateX(-50%); width: 12px; height: 50px; z-index: 3; }
+.candle-stick { width: 100%; height: 100%; background: linear-gradient(to right, #e5c158 50%, #d4af37 100%); border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.flame {
+    position: absolute; top: -20px; left: 50%; transform: translateX(-50%); width: 16px; height: 24px;
+    background: radial-gradient(circle at bottom, #ffea00 20%, #ff6d00 60%, rgba(255,109,0,0) 100%);
+    border-radius: 50% 50% 50% 50% / 70% 70% 40% 40%;
+    box-shadow: 0 0 20px #ff6d00, 0 0 40px #ffea00;
+    animation: flameMove 0.15s infinite alternate ease-in-out;
+    transform-origin: bottom center;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.flame.extinguished { opacity: 0 !important; transform: translateX(-50%) scale(0) !important; }
+
+@keyframes flameMove {
+    0% { transform: translateX(-50%) rotate(-2deg) scaleX(0.95); }
+    100% { transform: translateX(-50%) rotate(3deg) scaleX(1.05); }
+}
+
+/* ===================================================================
+   STAGE 5.5: TEXTAREA ELEGAN UNTUK SEPATAH KATA NITA
+   =================================================================== */
+#nitaTextArea {
+    width: 100%;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 117, 151, 0.2);
+    border-radius: 12px;
+    padding: 12px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    resize: none;
+    outline: none;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+#nitaTextArea:focus {
+    border-color: #ff7597;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(255, 117, 151, 0.2);
+}
+
+/* ===================================================================
+   STAGE 6: QUIZ & SCRATCH CARD SURPRISE
+   =================================================================== */
+.stage-layer { position: fixed; inset:0; background:#0a0a0c; z-index:999; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+.quiz-sec { position:fixed; inset:0; background:#0a0a0c; z-index:1000; display:flex; flex-direction:column; justify-content:center; align-items:center; padding: 20px; }
+.quiz-container { max-width: 500px; width: 100%; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; text-align: center; }
+.letter-p { font-size: 0.9rem; line-height: 1.6; color: #ddd; font-style: italic; }
+
+.hidden { display: none !important; }
+
+
+
+/* opening */
+
